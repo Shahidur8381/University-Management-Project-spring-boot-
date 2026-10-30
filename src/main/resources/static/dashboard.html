@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - University Management System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: #fff;
+            padding: 0 32px;
+            height: 56px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .navbar h1 { font-size: 17px; color: #333; font-weight: 700; }
+        .navbar .right { font-size: 13px; color: #666; }
+        .navbar .right strong { color: #333; }
+        .navbar .right a {
+            color: #4a7cff; text-decoration: none;
+            margin-left: 16px; font-weight: 600;
+        }
+        .navbar .right a:hover { text-decoration: underline; }
+
+        /* Tabs */
+        .tab-bar {
+            background: #fff;
+            padding: 0 32px;
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-btn {
+            padding: 14px 20px;
+            background: none; border: none;
+            font-size: 14px; font-weight: 600;
+            color: #888; cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+        .tab-btn:hover { color: #555; }
+        .tab-btn.active { color: #4a7cff; border-bottom-color: #4a7cff; }
+
+        /* Main Content */
+        .main { padding: 24px 32px; max-width: 1200px; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px;
+        }
+        .panel-header h2 { font-size: 18px; color: #333; font-weight: 600; }
+
+        /* Table */
+        .table-wrap {
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: #fafafa;
+            border-bottom: 1px solid #eee;
+        }
+        td {
+            padding: 11px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #444;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f8f9ff; }
+        .empty-row td {
+            text-align: center;
+            color: #aaa;
+            padding: 32px;
+            font-style: italic;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 7px 16px;
+            border: none; border-radius: 4px;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-primary { background: #4a7cff; color: #fff; }
+        .btn-primary:hover { background: #3a65d4; }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+        .btn-edit { background: #e8f0fe; color: #4a7cff; }
+        .btn-edit:hover { background: #d5e3fc; }
+        .btn-delete { background: #fdecea; color: #c62828; margin-left: 6px; }
+        .btn-delete:hover { background: #f9d5d0; }
+        .btn-cancel { background: #e9ecef; color: #555; }
+        .btn-cancel:hover { background: #dee2e6; }
+        .btn-save { background: #4a7cff; color: #fff; }
+        .btn-save:hover { background: #3a65d4; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.35);
+            justify-content: center; align-items: center;
+            z-index: 100;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #fff;
+            padding: 28px;
+            border-radius: 8px;
+            width: 440px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        .modal h3 {
+            font-size: 17px; color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal label {
+            display: block;
+            font-size: 13px; font-weight: 600;
+            color: #555;
+            margin-top: 14px;
+            margin-bottom: 5px;
+        }
+        .modal label:first-of-type { margin-top: 0; }
+        .modal input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+            background: #fafafa;
+        }
+        .modal input:focus { outline: none; border-color: #4a7cff; background: #fff; }
+        .modal .hint { font-size: 11px; color: #999; margin-top: 2px; }
+        .modal-actions {
+            margin-top: 24px;
+            display: flex; gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* Welcome */
+        .welcome-box {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .welcome-box h2 { color: #333; font-size: 22px; margin-bottom: 8px; }
+        .welcome-box p { color: #888; font-size: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h1>University Management System</h1>
+        <div class="right">
+            Signed in as <strong id="nav-user">...</strong>
+            &middot; <span id="nav-role">...</span>
+            <a href="/logout">Sign out</a>
+        </div>
+    </div>
+
+    <div class="tab-bar" id="tab-bar"></div>
+
+    <div class="main">
+
+        <!-- Welcome (for roles with no panels) -->
+        <div class="panel" id="panel-welcome">
+            <div class="welcome-box">
+                <h2>Welcome</h2>
+                <p>You are signed in but you do not have any management access.</p>
+            </div>
+        </div>
+
+        <!-- Teachers Panel -->
+        <div class="panel" id="panel-teachers">
+            <div class="panel-header">
+                <h2>Teachers</h2>
+                <button class="btn btn-primary" id="btn-add-teacher" onclick="openModal('teacher')" style="display:none">Add Teacher</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Username</th><th>Name</th>
+                            <th>Email</th><th>Department</th><th>Designation</th>
+                            <th class="col-actions" style="display:none">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-teachers"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Students Panel -->
+        <div class="panel" id="panel-students">
+            <div class="panel-header">
+                <h2>Students</h2>
+                <button class="btn btn-primary" onclick="openModal('student')">Add Student</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Username</th><th>Name</th>
+                            <th>Email</th><th>Student ID</th><th>Department</th>
+                            <th>Semester</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-students"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <h3 id="modal-title">Add</h3>
+            <form id="modal-form">
+                <input type="hidden" id="f-id">
+                <input type="hidden" id="f-type">
+
+                <label>Username</label>
+                <input type="text" id="f-username" required>
+
+                <label>Password</label>
+                <input type="password" id="f-password">
+                <div class="hint" id="hint-pw">Required for new accounts. Leave blank when editing to keep current password.</div>
+
+                <label>Name</label>
+                <input type="text" id="f-name" required>
+
+                <label>Email</label>
+                <input type="email" id="f-email" required>
+
+                <label>Department</label>
+                <input type="text" id="f-department">
+
+                <div id="fields-teacher" style="display:none">
+                    <label>Designation</label>
+                    <input type="text" id="f-designation">
+                </div>
+
+                <div id="fields-student-id" style="display:none">
+                    <label>Student ID</label>
+                    <input type="text" id="f-studentId">
+                </div>
+                <div id="fields-semester" style="display:none">
+                    <label>Semester</label>
+                    <input type="number" id="f-semester" min="1" max="12">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-save">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+/* ---- State ---- */
+let role = '';
+let canEditTeachers = false;
+
+/* ---- Init ---- */
+async function init() {
+    try {
+        const res = await fetch('/api/me');
+        if (!res.ok) { window.location.href = '/login.html'; return; }
+        const user = await res.json();
+
+        role = user.role;
+        canEditTeachers = (role === 'ROLE_ADMIN');
+
+        document.getElementById('nav-user').textContent = user.username;
+        document.getElementById('nav-role').textContent = role.replace('ROLE_', '');
+
+        buildTabs();
+    } catch (e) {
+        window.location.href = '/login.html';
+    }
+}
+
+function buildTabs() {
+    const bar = document.getElementById('tab-bar');
+    bar.innerHTML = '';
+    const tabs = [];
+
+    if (role === 'ROLE_ADMIN') {
+        tabs.push({ id: 'teachers', label: 'Teachers' });
+        tabs.push({ id: 'students', label: 'Students' });
+    } else if (role === 'ROLE_TEACHER') {
+        tabs.push({ id: 'students', label: 'Students' });
+    } else if (role === 'ROLE_STUDENT') {
+        tabs.push({ id: 'teachers', label: 'Teachers' });
+    }
+
+    if (tabs.length === 0) {
+        document.getElementById('panel-welcome').classList.add('active');
+        return;
+    }
+
+    // Show Add button and Actions column for teachers only if admin
+    if (canEditTeachers) {
+        document.getElementById('btn-add-teacher').style.display = '';
+        document.querySelectorAll('.col-actions').forEach(el => el.style.display = '');
+    }
+
+    tabs.forEach(t => {
+        const btn = document.createElement('button');
+        btn.className = 'tab-btn';
+        btn.textContent = t.label;
+        btn.setAttribute('data-tab', t.id);
+        btn.onclick = () => switchTab(t.id);
+        bar.appendChild(btn);
+    });
+
+    switchTab(tabs[0].id);
+}
+
+function switchTab(id) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        if (b.getAttribute('data-tab') === id) b.classList.add('active');
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    loadData(id);
+}
+
+/* ---- Load Data ---- */
+async function loadData(type) {
+    const res = await fetch('/api/' + type);
+    const data = await res.json();
+    const tbody = document.getElementById('table-' + type);
+    tbody.innerHTML = '';
+
+    if (data.length === 0) {
+        const cols = type === 'teachers' ? 7 : 8;
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols + '">No records found.</td></tr>';
+        return;
+    }
+
+    data.forEach(item => {
+        const tr = document.createElement('tr');
+
+        if (type === 'teachers') {
+            let actionsCell = '';
+            if (canEditTeachers) {
+                actionsCell = '<td>' +
+                    '<button class="btn btn-sm btn-edit" onclick="editItem(\'teacher\',' + item.id + ')">Edit</button>' +
+                    '<button class="btn btn-sm btn-delete" onclick="deleteItem(\'teachers\',' + item.id + ')">Delete</button>' +
+                    '</td>';
+            }
+            tr.innerHTML =
+                '<td>' + item.id + '</td>' +
+                '<td>' + item.username + '</td>' +
+                '<td>' + item.name + '</td>' +
+                '<td>' + item.email + '</td>' +
+                '<td>' + (item.department || '-') + '</td>' +
+                '<td>' + (item.designation || '-') + '</td>' +
+                actionsCell;
+        } else if (type === 'students') {
+            tr.innerHTML =
+                '<td>' + item.id + '</td>' +
+                '<td>' + item.username + '</td>' +
+                '<td>' + item.name + '</td>' +
+                '<td>' + item.email + '</td>' +
+                '<td>' + (item.studentId || '-') + '</td>' +
+                '<td>' + (item.department || '-') + '</td>' +
+                '<td>' + (item.semester || '-') + '</td>' +
+                '<td>' +
+                    '<button class="btn btn-sm btn-edit" onclick="editItem(\'student\',' + item.id + ')">Edit</button>' +
+                    '<button class="btn btn-sm btn-delete" onclick="deleteItem(\'students\',' + item.id + ')">Delete</button>' +
+                '</td>';
+        }
+
+        tbody.appendChild(tr);
+    });
+}
+
+/* ---- Modal ---- */
+function openModal(type, data) {
+    document.getElementById('f-type').value = type;
+    document.getElementById('modal-title').textContent = data ? 'Edit ' + capitalize(type) : 'Add ' + capitalize(type);
+
+    document.getElementById('f-id').value = data ? data.id : '';
+    document.getElementById('f-username').value = data ? data.username : '';
+    document.getElementById('f-username').readOnly = !!data;
+    document.getElementById('f-password').value = '';
+    document.getElementById('f-name').value = data ? data.name : '';
+    document.getElementById('f-email').value = data ? data.email : '';
+    document.getElementById('f-department').value = data ? (data.department || '') : '';
+
+    document.getElementById('fields-teacher').style.display = type === 'teacher' ? 'block' : 'none';
+    document.getElementById('fields-student-id').style.display = type === 'student' ? 'block' : 'none';
+    document.getElementById('fields-semester').style.display = type === 'student' ? 'block' : 'none';
+
+    if (type === 'teacher') {
+        document.getElementById('f-designation').value = data ? (data.designation || '') : '';
+    }
+    if (type === 'student') {
+        document.getElementById('f-studentId').value = data ? (data.studentId || '') : '';
+        document.getElementById('f-semester').value = data ? (data.semester || '') : '';
+    }
+
+    document.getElementById('modal-overlay').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('show');
+}
+
+async function editItem(type, id) {
+    const res = await fetch('/api/' + type + 's/' + id);
+    if (!res.ok) { alert('Record not found.'); return; }
+    const data = await res.json();
+    openModal(type, data);
+}
+
+async function deleteItem(type, id) {
+    if (!confirm('Are you sure you want to delete this record?')) return;
+    await fetch('/api/' + type + '/' + id, { method: 'DELETE' });
+    loadData(type);
+}
+
+document.getElementById('modal-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const type = document.getElementById('f-type').value;
+    const id = document.getElementById('f-id').value;
+    const isEdit = !!id;
+
+    const body = {
+        username: document.getElementById('f-username').value,
+        name: document.getElementById('f-name').value,
+        email: document.getElementById('f-email').value,
+        department: document.getElementById('f-department').value
+    };
+
+    const pw = document.getElementById('f-password').value;
+    if (pw) body.password = pw;
+
+    if (type === 'teacher') body.designation = document.getElementById('f-designation').value;
+    if (type === 'student') {
+        body.studentId = document.getElementById('f-studentId').value;
+        body.semester = parseInt(document.getElementById('f-semester').value) || null;
+    }
+
+    const url = isEdit ? '/api/' + type + 's/' + id : '/api/' + type + 's';
+    const method = isEdit ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+
+    if (res.ok) {
+        closeModal();
+        loadData(type + 's');
+    } else {
+        alert('Error: ' + res.status);
+    }
+});
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+init();
+</script>
+
+</body>
+</html>
